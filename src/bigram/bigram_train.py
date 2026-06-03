@@ -34,7 +34,7 @@ class Dataset:
     vocab_size: int
 
 
-def load_dataset(path: Path = Path(__file__).parent.parent / "data/tiny_shakespeare.txt"):
+def load_dataset(path: Path | str):
     with open(path, 'r', encoding='UTF-8') as f:
         text = f.read()
 
@@ -82,10 +82,10 @@ def estimate_loss(model, ds, eval_iters, block_size, batch_size, device):
 # Training
 # =============================================================================
 
-os.makedirs("models", exist_ok=True)
-device = "cuda" if torch.cuda.is_available() else "cpu"
 
-ds = load_dataset()
+device = "cuda" if torch.cuda.is_available() else "cpu"
+data_path = Path(__file__).parent.parent / "data/tiny_shakespeare.txt"
+ds = load_dataset(data_path)
 model = BigramLanguageModel(ds.vocab_size).to(device)
 optimizer = torch.optim.AdamW(model.parameters(), lr=1e-3)
 
@@ -104,7 +104,7 @@ for i in range(MAX_STEPS):
 # =============================================================================
 # Save
 # =============================================================================
-
+os.makedirs("models", exist_ok=True)
 torch.save({
     "model": model.state_dict(),
     "itos": ds.itos,

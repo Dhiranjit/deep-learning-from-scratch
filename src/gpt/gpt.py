@@ -10,7 +10,7 @@ from dataclasses import dataclass
 
 @dataclass
 class ModelConfig:
-    vocab_size: int = None
+    vocab_size: int
     n_embed: int = 384
     n_head: int = 6
     n_layers: int = 6
