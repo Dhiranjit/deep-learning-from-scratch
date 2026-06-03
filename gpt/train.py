@@ -15,7 +15,7 @@ from gpt.gpt import ModelConfig, GPT
 @dataclass
 class TrainConfig:
     model: ModelConfig = field(default_factory=ModelConfig)
-    max_steps: int = 3000
+    max_steps: int = 6000
     batch_size: int = 64
     eval_iters: int = 30
     lr: float = 3e-4
@@ -33,7 +33,7 @@ class Dataset:
     vocab_size: int
 
 
-def load_dataset(path: Path = Path(__file__).parent.parent / "data/tiny_shakespeare.txt"):
+def load_dataset(path: Path = Path(__file__).parent.parent / "data/shakespeare_combined.txt"):
     with open(path, 'r', encoding='UTF-8') as f:
         text = f.read()
 
@@ -94,6 +94,8 @@ if __name__ == "__main__":
     tcfg.model.vocab_size = ds.vocab_size
     model = GPT(tcfg.model).to(tcfg.model.device)
 
+    # Print Model Config
+    # =============================================================================
     param_count = sum(p.numel() for p in model.parameters())
     print("=" * 45)
     print(f"  GPT Model")
@@ -109,8 +111,10 @@ if __name__ == "__main__":
     print(f"  parameters : {param_count:,}")
     print("=" * 45)
     print()
+    # =============================================================================
 
     optimizer = torch.optim.AdamW(model.parameters(), lr=tcfg.lr)
+    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=tcfg.max_steps, eta_min=3e-5)
 
     pbar = tqdm(range(tcfg.max_steps), desc="Training", unit="step")
 
@@ -121,6 +125,7 @@ if __name__ == "__main__":
         logits, loss = model(xb, yb)
         loss.backward()
         optimizer.step()
+        scheduler.step()
 
         if i % 300 == 0 or i == tcfg.max_steps - 1:
             train_loss, val_loss = estimate_loss(model, ds, tcfg)
@@ -135,6 +140,7 @@ if __name__ == "__main__":
                 "model_config": asdict(tcfg.model),
             }, f"models/gpt_{i}.pt")
 
+    # Final Model save
     torch.save({
                 "model": model.state_dict(),
                 "itos": ds.itos,

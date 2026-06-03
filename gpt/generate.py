@@ -36,7 +36,6 @@ model = GPT(cfg).to(device)
 model.load_state_dict(checkpoint["model"])
 
 model.eval()
-idx = torch.zeros(1, 1, dtype=torch.long, device=device)
 
 if args.stream:
     for idx_next in model.generate_stream(idx, args.tokens):

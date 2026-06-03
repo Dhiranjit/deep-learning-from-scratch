@@ -11,10 +11,10 @@ from dataclasses import dataclass
 @dataclass
 class ModelConfig:
     vocab_size: int = None
-    n_embed: int = 192
+    n_embed: int = 384
     n_head: int = 6
     n_layers: int = 6
-    block_size: int = 256
+    block_size: int = 512
     dropout: float = 0.2
     device: str = "cuda" if torch.cuda.is_available() else "cpu"
 
