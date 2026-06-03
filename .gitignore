@@ -1,6 +1,6 @@
 .vscode
 *.egg-info
 __pycache__
-data/
+data/mnist
 CLAUDE.md
 models/
